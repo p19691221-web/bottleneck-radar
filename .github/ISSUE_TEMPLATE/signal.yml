@@ -1,0 +1,56 @@
+name: 回報訊號
+description: 回報一則「AI 讓哪種配套開始塞車」的事件或觀察
+title: "[訊號] "
+labels: ["signal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感謝回報。整理者會確認來源存在、補上瓶頸分類與證據強度後上架；這則 issue 底下就是這則訊號的討論區。
+        請用自己的話描述事件，不要貼上文章原文。
+  - type: input
+    id: event
+    attributes:
+      label: 事件
+      description: 一句話，誰、做了什麼、結果如何
+      placeholder: 例如：評估中的 AI agent 向警方表單送出捏造線索
+    validations:
+      required: true
+  - type: input
+    id: date
+    attributes:
+      label: 日期
+      description: 事件發生或揭露的日期，格式 YYYY-MM-DD 或 YYYY-MM；不確定可留空
+      placeholder: 2026-07-18
+  - type: input
+    id: url
+    attributes:
+      label: 來源網址
+      description: 以 https:// 開頭；能找到當事方原文最好
+      placeholder: https://
+    validations:
+      required: true
+  - type: dropdown
+    id: bottleneck
+    attributes:
+      label: 瓶頸
+      description: 你覺得它屬於哪一種塞車；整理者會再確認
+      options:
+        - 審查與查證
+        - 授權與範圍
+        - 協調與容量
+        - 偵測與事故證據
+        - 信任與正當性
+        - 實體與資源
+        - 不確定
+      default: 6
+  - type: input
+    id: cost
+    attributes:
+      label: 誰付了代價
+      description: 誰承擔了損失、處理成本或額外工作；不知道可留空
+  - type: textarea
+    id: note
+    attributes:
+      label: 補充說明
+      description: 為什麼你認為這是塞車的訊號？還缺什麼證據？

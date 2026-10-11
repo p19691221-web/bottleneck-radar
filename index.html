@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AI 瓶頸雷達</title>
+<meta name="description" content="AI 讓產出變便宜之後，哪種配套先塞車？收集有來源、標明證據強度的訊號：審查、授權、協調、事故證據、信任、實體資源。">
+<meta property="og:title" content="AI 瓶頸雷達">
+<meta property="og:description" content="AI 讓產出變便宜之後，哪種配套先塞車？每則訊號都附來源與證據強度。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: masthead + stats, radar card beside its legend, filter bar, signal cards; one column on phones */
+:root{
+  --bg:#f3f1ec; --panel:#fffdf9; --fg:#1d2326; --muted:#5f676b; --line:#d9d4ca;
+  --ink:#0f5c5c; --ink-soft:#dcebe8; --amber:#c27a0e; --amber-soft:#f6e6c8;
+  --raw:#1f6f43; --party:#2d5d8a; --media:#7a5a1f; --none:#7d7d7d;
+  --grid:#d9d4ca; --axis:#b9b2a5;
+  --display:"Noto Serif TC",Georgia,serif;
+  --body:"Noto Sans TC",system-ui,-apple-system,"PingFang TC",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --r:8px; color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#121615; --panel:#1a1f1e; --fg:#e6ebe9; --muted:#9aa5a2; --line:#2c3533;
+  --ink:#6fc2b8; --ink-soft:#1d3532; --amber:#e9a83f; --amber-soft:#3a2c14;
+  --raw:#6fcf97; --party:#8db8e3; --media:#d9b56a; --none:#9a9a9a;
+  --grid:#2c3533; --axis:#3e4946; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.6}
+[hidden]{display:none!important}
+img{max-width:100%}
+a{color:var(--ink)}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:calc(28px + env(safe-area-inset-top,0px)) 64px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px}
+h1{font-family:var(--display);font-weight:900;font-size:clamp(30px,6vw,46px);line-height:1.1;margin:0;text-wrap:balance}
+h1 small{display:block;font-family:var(--mono);font-size:12px;font-weight:400;color:var(--muted);letter-spacing:.08em;margin-bottom:8px}
+.sub{color:var(--muted);margin:8px 0 0;max-width:52ch}
+.stats{display:flex;flex-wrap:wrap;gap:20px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.stats b{display:block;font-size:24px;color:var(--fg);font-variant-numeric:tabular-nums;font-weight:600}
+button,input,select{font:inherit;color:inherit}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:7px 14px;cursor:pointer;text-decoration:none;color:var(--fg);display:inline-block;white-space:nowrap}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--panel);border-color:var(--ink);font-weight:700}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;min-width:0}
+.panel h2{font-family:var(--display);font-size:20px;margin:0}
+.hint{font-size:13px;color:var(--muted);margin:4px 0 0}
+.radar-row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px;margin-bottom:16px}
+@media (max-width:780px){.radar-row{grid-template-columns:1fr}}
+#radar{position:relative;min-height:240px;margin-top:8px}
+#radar svg{display:block;width:100%;height:auto}
+#radar text{font-family:var(--body)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin-top:6px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.axes{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+.axes button{width:100%;text-align:left;border:1px solid var(--line);background:none;border-radius:6px;padding:8px 10px;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:2px 10px}
+.axes button[aria-pressed="true"]{border-color:var(--ink);background:var(--ink-soft)}
+.axes .nm{font-weight:700}
+.axes .ct{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted);text-align:right}
+.axes .ds{grid-column:1/-1;font-size:12px;color:var(--muted)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px solid var(--line)}
+#q{flex:1 1 200px;min-width:0;border:1px solid var(--line);border-radius:999px;padding:7px 14px;background:var(--panel)}
+.bar select{border:1px solid var(--line);border-radius:999px;padding:7px 10px;background:var(--panel);max-width:100%}
+.active{font-size:13px;color:var(--muted);margin:10px 0 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.active button{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:0 10px;cursor:pointer;font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;margin-top:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card .top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.card h3{margin:0;font-size:16px;line-height:1.45;overflow-wrap:anywhere}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;border:1px solid var(--line);border-radius:4px;padding:1px 8px;color:var(--muted);background:none}
+.chip.bn{color:var(--ink);border-color:var(--ink)}
+.chip.cost{background:var(--amber-soft);color:var(--fg);border-color:var(--amber)}
+.ev{font-family:var(--mono);font-size:11px;padding:1px 8px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+.ev-raw{color:var(--raw)}.ev-party{color:var(--party)}.ev-media{color:var(--media)}.ev-none{color:var(--none)}
+.kv{font-size:13px;margin:0;overflow-wrap:anywhere}
+.kv span{color:var(--muted)}
+.foot{margin-top:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;border-top:1px dashed var(--line);padding-top:10px}
+.foot .src{font-size:13px;overflow-wrap:anywhere}
+.acts{display:flex;gap:6px}
+.icon-btn{white-space:nowrap;border:1px solid var(--line);background:none;border-radius:999px;padding:3px 10px;cursor:pointer;font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.empty{grid-column:1/-1;border:1px dashed var(--line);border-radius:var(--r);padding:32px 20px;text-align:center;color:var(--muted)}
+.empty strong{display:block;color:var(--fg);font-family:var(--display);font-size:20px;margin-bottom:4px}
+.method{margin-top:28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px}
+.method h3{font-family:var(--display);font-size:16px;margin:0 0 4px}
+.method p,.method li{font-size:13px;color:var(--muted);margin:0}
+.method ul{margin:0;padding-left:18px}
+.scrim{position:fixed;inset:0;background:rgba(10,15,15,.45);z-index:20}
+.sheet{position:fixed;top:0;right:0;bottom:0;width:min(480px,100%);background:var(--panel);z-index:21;display:flex;flex-direction:column;border-left:1px solid var(--line);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.sheet header{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.sheet h2{margin:0;font-size:18px;line-height:1.45;overflow-wrap:anywhere}
+.sheet .body{flex:1;overflow:auto;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.cmt{display:flex;gap:10px}
+.cmt img{width:28px;height:28px;border-radius:50%;flex:none}
+.cmt .c{min-width:0;flex:1}
+.cmt .n{font-size:12px;color:var(--muted);display:flex;gap:8px}
+.cmt p{margin:2px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.sheet footer{border-top:1px solid var(--line);padding:12px 18px;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.tip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,.12);white-space:nowrap}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:slide .2s ease-out}@keyframes slide{from{transform:translateX(24px);opacity:.6}}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1><small>AI BOTTLENECK RADAR · 哪裡先塞車</small>AI 瓶頸雷達</h1>
+      <p class="sub">AI 讓產出、建議和操作變得便宜，跟不上的是審查、授權、協調、事故證據、信任和實體資源。這裡收集有來源、標明證據強度的塞車訊號。</p>
+    </div>
+    <div class="stats">
+      <div><b id="st-all">–</b>則訊號</div>
+      <div><b id="st-cost">–</b>則已有人付代價</div>
+      <div><b id="st-abs">–</b>則平台吸收</div>
+      <div><b id="st-cmt">–</b>則討論</div>
+    </div>
+  </header>
+
+  <div class="radar-row">
+    <section class="panel">
+      <h2>哪種配套在塞車</h2>
+      <p class="hint">每軸是一種瓶頸，刻度是已上架的訊號筆數，不是發生頻率。</p>
+      <div id="radar"></div>
+      <div class="legend">
+        <span><span class="sw" style="background:var(--ink)"></span>全部訊號</span>
+        <span><span class="sw" style="background:var(--amber)"></span>其中已有人付出代價</span>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>六種瓶頸</h2>
+      <p class="hint">點一項，只看這一類訊號。</p>
+      <ul class="axes" id="axes"></ul>
+    </section>
+  </div>
+
+  <div class="bar">
+    <input id="q" type="search" placeholder="搜尋事件、誰付了代價、補充說明…" aria-label="搜尋">
+    <select id="f-type" aria-label="訊號類型"><option value="">所有類型</option></select>
+    <select id="f-ev" aria-label="證據強度"><option value="">所有證據強度</option></select>
+    <select id="sort" aria-label="排序">
+      <option value="date">事件日期新到舊</option>
+      <option value="seen">最多「我也看到」</option>
+      <option value="talk">最多討論</option>
+    </select>
+    <a class="btn primary" id="submit-link" target="_blank" rel="noopener">＋ 回報訊號</a>
+  </div>
+  <div class="active" id="active" hidden></div>
+
+  <div class="grid" id="grid">
+    <div class="empty"><strong>正在載入訊號…</strong>清單來自 GitHub，第一次開啟要等一兩秒。</div>
+  </div>
+
+  <section class="method">
+    <div class="panel">
+      <h3>上架代表什麼</h3>
+      <p>上架只代表整理者確認來源存在，並補上了瓶頸分類與證據強度。它不是對事件的判定，也不代表事件描述一定正確。</p>
+    </div>
+    <div class="panel">
+      <h3>證據強度</h3>
+      <ul>
+        <li><b>原始紀錄</b>：日誌、判決、監管文件等可核對的一手資料</li>
+        <li><b>當事方聲明</b>：涉事公司或機構自己的說法</li>
+        <li><b>媒體轉述</b>：媒體或第三方的整理與引述</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>訊號類型</h3>
+      <ul>
+        <li><b>已有人付出成本</b>：已出現損失、重建或事故處理</li>
+        <li><b>塞車跡象</b>：量或速度超過既有配套，尚未見損失</li>
+        <li><b>平台吸收</b>：控制被平台或必經關口內建</li>
+        <li><b>治理先行</b>：規範或委員會先於問題出現</li>
+        <li><b>歷史先例</b>：AI 之前的同類事件，只作對照</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>參與方式</h3>
+      <p>回報與討論都在 GitHub 上進行，需要一個免費帳號。請用自己的話描述事件，附上來源連結，不要貼文章原文。卡片上的 👍 代表「我也看到類似情況」。</p>
+    </div>
+  </section>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="sheet" id="sheet" hidden role="dialog" aria-labelledby="sh-title">
+  <header>
+    <h2 id="sh-title"></h2>
+    <button class="btn" id="sh-close">關閉</button>
+  </header>
+  <div class="body" id="sh-body"></div>
+  <footer><span>討論與 👍 都在 GitHub 上</span><a class="btn primary" id="sh-gh" target="_blank" rel="noopener">到 GitHub 討論</a></footer>
+</aside>
+
+<script>
+/* ===== 設定：GitHub 帳號與 repo 名稱 ===== */
+const OWNER = "p19691221-web";
+const REPO  = "bottleneck-radar";
+const LISTED_LABEL = "listed";
+/* ======================================= */
+
+const AXES = [
+  ["審查與查證", "產出多到看不完、驗不完"],
+  ["授權與範圍", "不清楚誰能做、做到哪裡、何時停止"],
+  ["協調與容量", "大量請求與操作互相擠壓"],
+  ["偵測與事故證據", "出事後多久發現、能否還原經過"],
+  ["信任與正當性", "該聽誰的、誰有權決定"],
+  ["實體與資源", "能源、材料、場地等實體配套"]
+];
+const AXIS_NAMES = AXES.map(a => a[0]);
+const SHORT = {"審查與查證": "審查", "授權與範圍": "授權", "協調與容量": "協調", "偵測與事故證據": "事故證據", "信任與正當性": "信任", "實體與資源": "實體"};
+const TYPES = ["已有人付出成本", "塞車跡象", "平台吸收", "治理先行", "歷史先例"];
+const EVIDENCE = {"原始紀錄": "ev-raw", "當事方聲明": "ev-party", "媒體轉述": "ev-media"};
+const NL = String.fromCharCode(10);
+
+const $ = s => document.querySelector(s);
+const API = `https://api.github.com/repos/${OWNER}/${REPO}`;
+const S = {items: [], q: "", type: "", ev: "", sort: "date", axis: null, openId: null};
+
+$("#submit-link").href = `https://github.com/${OWNER}/${REPO}/issues/new?template=signal.yml`;
+TYPES.forEach(t => $("#f-type").append(new Option(t, t)));
+Object.keys(EVIDENCE).concat("未標").forEach(e => $("#f-ev").append(new Option(e, e)));
+
+function el(tag, props = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === "text") e.textContent = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else if (v !== undefined && v !== null && v !== false) e.setAttribute(k, v);
+  }
+  for (const k of kids) if (k) e.append(k);
+  return e;
+}
+function safeUrl(u) { try { const x = new URL(u); return x.protocol === "https:" || x.protocol === "http:" ? x.href : null; } catch { return null; } }
+function hostOf(u) { try { return new URL(u).hostname.replace(/^www[.]/, ""); } catch { return ""; } }
+function ago(iso) {
+  const t = Date.parse(iso); if (!t) return "";
+  const s = (Date.now() - t) / 1000;
+  if (s < 3600) return Math.max(1, Math.floor(s / 60)) + " 分鐘前";
+  if (s < 86400) return Math.floor(s / 3600) + " 小時前";
+  if (s < 86400 * 30) return Math.floor(s / 86400) + " 天前";
+  return new Date(t).toLocaleDateString("zh-TW");
+}
+
+/* GitHub issue form 內文格式：### 標題，空一行，內容 */
+function parseForm(body) {
+  const out = {};
+  const parts = (body || "").split(/^###[ ]+/m).slice(1);
+  for (const p of parts) {
+    const i = p.indexOf(NL);
+    const k = (i < 0 ? p : p.slice(0, i)).trim();
+    let v = i < 0 ? "" : p.slice(i + 1).trim();
+    if (v === "_No response_") v = "";
+    out[k] = v;
+  }
+  return out;
+}
+function labelValue(labels, prefix) {
+  const hit = labels.find(n => n.startsWith(prefix));
+  return hit ? hit.slice(prefix.length).trim() : "";
+}
+function toItem(issue) {
+  const f = parseForm(issue.body);
+  const labels = (issue.labels || []).map(l => typeof l === "string" ? l : l.name);
+  const axis = labelValue(labels, "瓶頸:");
+  const ev = labelValue(labels, "證據:");
+  const type = labelValue(labels, "類型:");
+  const date = /^[0-9]{4}(-[0-9]{2}){0,2}$/.test(f["日期"] || "") ? f["日期"] : "";
+  return {
+    id: issue.number,
+    event: f["事件"] || issue.title.replace(/^\[訊號\]\s*/, ""),
+    date, url: safeUrl(f["來源網址"] || ""),
+    axis: AXIS_NAMES.includes(axis) ? axis : "未分類",
+    ev: EVIDENCE[ev] ? ev : "未標",
+    type: TYPES.includes(type) ? type : "未標",
+    cost: f["誰付了代價"] || "",
+    note: f["補充說明"] || "",
+    seen: (issue.reactions && issue.reactions["+1"]) || 0,
+    comments: issue.comments || 0,
+    at: issue.created_at, html: issue.html_url,
+    by: issue.user ? issue.user.login : ""
+  };
+}
+
+async function load() {
+  const KEY = "radar-cache-v1";
+  try {
+    const c = JSON.parse(sessionStorage.getItem(KEY) || "null");
+    if (c && Date.now() - c.t < 5 * 60 * 1000) { S.items = c.items; render(); return; }
+  } catch {}
+  try {
+    const r = await fetch(`${API}/issues?labels=${encodeURIComponent(LISTED_LABEL)}&state=open&per_page=100`, {headers: {Accept: "application/vnd.github+json"}});
+    if (!r.ok) throw new Error(r.status === 403 ? "rate" : "http");
+    const data = await r.json();
+    S.items = data.filter(i => !i.pull_request).map(toItem);
+    try { sessionStorage.setItem(KEY, JSON.stringify({t: Date.now(), items: S.items})); } catch {}
+    render();
+  } catch (e) {
+    $("#grid").replaceChildren(el("div", {class: "empty"},
+      el("strong", {text: e.message === "rate" ? "GitHub 暫時限流" : "載入失敗"}),
+      document.createTextNode(e.message === "rate" ? "同一網路一小時內讀取次數到上限，請稍後再開。" : "無法從 GitHub 讀取訊號清單，請稍後重新整理。")));
+    drawRadar([]);
+  }
+}
+
+function counts(items) {
+  return AXIS_NAMES.map(a => ({
+    axis: a,
+    total: items.filter(i => i.axis === a).length,
+    cost: items.filter(i => i.axis === a && i.type === "已有人付出成本").length
+  }));
+}
+
+const SVGNS = "http://www.w3.org/2000/svg";
+function sv(tag, attrs, text) {
+  const e = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function drawRadar(items) {
+  const box = $("#radar");
+  box.replaceChildren();
+  const rows = counts(items);
+  const W = Math.max(280, box.clientWidth || 480);
+  const svg = sv("svg", {role: "img", "aria-label": "各瓶頸訊號數雷達圖"});
+  box.append(svg);
+  const narrow = W < 520;
+  const label = r => `${narrow ? SHORT[r.axis] : r.axis} ${r.total}`;
+  let maxLabel = 0;
+  rows.forEach(r => {
+    const t = sv("text", {"font-size": 12}, label(r)); svg.append(t);
+    maxLabel = Math.max(maxLabel, t.getComputedTextLength()); t.remove();
+  });
+  const R = Math.max(56, Math.min(170, W / 2 - maxLabel - 18));
+  const H = Math.round(2 * R + 64);
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const n = rows.length, cx = W / 2, cy = H / 2;
+  const maxV = Math.max(1, ...rows.map(r => r.total));
+  const ang = i => -Math.PI / 2 + i * 2 * Math.PI / n;
+  const pt = (i, v) => [cx + Math.cos(ang(i)) * R * v / maxV, cy + Math.sin(ang(i)) * R * v / maxV];
+  const step = maxV > 8 ? Math.ceil(maxV / 4) : 1;
+  for (let k = step; k <= maxV; k += step) {
+    svg.append(sv("polygon", {points: rows.map((_, i) => pt(i, k).join(",")).join(" "), fill: "none", stroke: "var(--grid)", "stroke-width": 1}));
+    if (k < maxV) svg.append(sv("text", {x: cx + 4, y: cy - R * k / maxV - 2, "font-size": 11, fill: "var(--muted)"}, String(k)));
+  }
+  rows.forEach((_, i) => { const [x, y] = pt(i, maxV); svg.append(sv("line", {x1: cx, y1: cy, x2: x, y2: y, stroke: "var(--axis)", "stroke-width": 1})); });
+  [["total", "var(--ink)", .16], ["cost", "var(--amber)", .28]].forEach(([key, color, op]) => {
+    svg.append(sv("polygon", {points: rows.map((r, i) => pt(i, r[key]).join(",")).join(" "), fill: color, "fill-opacity": op, stroke: color, "stroke-width": 2, "stroke-linejoin": "round"}));
+    rows.forEach((r, i) => { const [x, y] = pt(i, r[key]); svg.append(sv("circle", {cx: x, cy: y, r: 3, fill: color})); });
+  });
+  const tip = el("div", {class: "tip", hidden: ""});
+  box.append(tip);
+  rows.forEach((r, i) => {
+    const c = Math.cos(ang(i)), s = Math.sin(ang(i));
+    const x = cx + c * (R + 10), y = cy + s * (R + 10) + (s > 0.5 ? 12 : s < -0.5 ? -4 : 4);
+    const on = S.axis === r.axis;
+    const t = sv("text", {x, y, "text-anchor": Math.abs(c) < 0.2 ? "middle" : (c > 0 ? "start" : "end"), "font-size": 12,
+      fill: on ? "var(--fg)" : "var(--muted)", "font-weight": on ? 700 : 400, tabindex: 0, role: "button", style: "cursor:pointer"}, label(r));
+    const toggle = () => { S.axis = on ? null : r.axis; render(); };
+    t.addEventListener("click", toggle);
+    t.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
+    t.addEventListener("mouseenter", () => {
+      tip.textContent = "";
+      tip.append(el("div", {text: r.axis, style: "color:var(--muted)"}), el("div", {text: `全部訊號 ${r.total}`}), el("div", {text: `已有人付代價 ${r.cost}`}));
+      tip.hidden = false;
+      const bw = box.clientWidth, sc = bw / W;
+      tip.style.left = Math.max(0, Math.min(bw - tip.offsetWidth, x * sc - tip.offsetWidth / 2)) + "px";
+      tip.style.top = (y * sc + 10) + "px";
+    });
+    t.addEventListener("mouseleave", () => { tip.hidden = true; });
+    svg.append(t);
+  });
+}
+
+function drawAxes(items) {
+  const rows = counts(items);
+  $("#axes").replaceChildren(...AXES.map(([name, desc], i) => el("li", {},
+    el("button", {"aria-pressed": String(S.axis === name), onclick: () => { S.axis = S.axis === name ? null : name; render(); }},
+      el("span", {class: "nm", text: name}),
+      el("span", {class: "ct", text: `${rows[i].total} 則 · 付代價 ${rows[i].cost}`}),
+      el("span", {class: "ds", text: desc})))));
+}
+
+function filtered() {
+  let list = S.items.slice();
+  if (S.axis) list = list.filter(i => i.axis === S.axis);
+  if (S.type) list = list.filter(i => i.type === S.type);
+  if (S.ev) list = list.filter(i => i.ev === S.ev);
+  const q = S.q.trim().toLowerCase();
+  if (q) list = list.filter(i => [i.event, i.cost, i.note, i.axis, i.type, hostOf(i.url || "")].join(" ").toLowerCase().includes(q));
+  const key = {
+    date: (a, b) => String(b.date || "").localeCompare(String(a.date || "")),
+    seen: (a, b) => b.seen - a.seen,
+    talk: (a, b) => b.comments - a.comments
+  }[S.sort];
+  return list.sort((a, b) => key(a, b) || Date.parse(b.at) - Date.parse(a.at));
+}
+
+function render() {
+  $("#st-all").textContent = S.items.length;
+  $("#st-cost").textContent = S.items.filter(i => i.type === "已有人付出成本").length;
+  $("#st-abs").textContent = S.items.filter(i => i.type === "平台吸收").length;
+  $("#st-cmt").textContent = S.items.reduce((n, i) => n + i.comments, 0);
+  drawRadar(S.items);
+  drawAxes(S.items);
+  const act = $("#active");
+  act.replaceChildren();
+  act.hidden = !S.axis;
+  if (S.axis) act.append(el("span", {text: "只看：" + S.axis}), el("button", {type: "button", text: "清除", onclick: () => { S.axis = null; render(); }}));
+  const g = $("#grid");
+  g.replaceChildren();
+  const list = filtered();
+  if (!list.length) {
+    const msg = S.items.length === 0 ? ["雷達還是空的", "按「＋ 回報訊號」回報第一則。"] : ["沒有符合的訊號", "換個關鍵字，或清除篩選試試。"];
+    g.append(el("div", {class: "empty"}, el("strong", {text: msg[0]}), document.createTextNode(msg[1])));
+  }
+  for (const it of list) {
+    g.append(el("article", {class: "card"},
+      el("div", {class: "top"}, el("span", {text: it.date || "日期未載明"}), el("span", {class: "ev " + (EVIDENCE[it.ev] || "ev-none"), text: it.ev === "未標" ? "證據未標" : it.ev})),
+      el("h3", {text: it.event}),
+      el("div", {class: "chips"},
+        el("span", {class: "chip bn", text: it.axis}),
+        el("span", {class: "chip" + (it.type === "已有人付出成本" ? " cost" : ""), text: it.type === "未標" ? "類型未標" : it.type})),
+      it.cost ? el("p", {class: "kv"}, el("span", {text: "誰付了代價："}), document.createTextNode(it.cost)) : null,
+      el("div", {class: "foot"},
+        el("div", {class: "src"}, it.url ? el("a", {href: it.url, target: "_blank", rel: "noopener noreferrer", text: "來源：" + hostOf(it.url) + " ↗"}) : document.createTextNode("來源網址無效")),
+        el("div", {class: "acts"},
+          el("button", {class: "icon-btn", title: "我也看到類似情況", onclick: () => openSheet(it.id), text: "👍 " + it.seen}),
+          el("button", {class: "icon-btn", title: "看討論", onclick: () => openSheet(it.id), text: "💬 " + it.comments})))));
+  }
+}
+
+async function openSheet(id) {
+  const it = S.items.find(x => x.id === id); if (!it) return;
+  S.openId = id; $("#sheet").hidden = false; $("#scrim").hidden = false;
+  $("#sh-title").textContent = it.event;
+  $("#sh-gh").href = it.html;
+  const b = $("#sh-body");
+  b.replaceChildren(
+    el("div", {class: "chips"}, el("span", {class: "chip bn", text: it.axis}), el("span", {class: "chip", text: it.type === "未標" ? "類型未標" : it.type}), el("span", {class: "ev " + (EVIDENCE[it.ev] || "ev-none"), text: it.ev === "未標" ? "證據未標" : it.ev})),
+    el("p", {class: "kv"}, el("span", {text: "日期："}), document.createTextNode(it.date || "未載明")),
+    it.cost ? el("p", {class: "kv"}, el("span", {text: "誰付了代價："}), document.createTextNode(it.cost)) : null,
+    it.note ? el("p", {class: "kv", style: "white-space:pre-wrap"}, el("span", {text: "補充說明："}), document.createTextNode(it.note)) : null,
+    it.url ? el("p", {class: "kv"}, el("a", {href: it.url, target: "_blank", rel: "noopener noreferrer", text: "開啟來源 ↗"})) : null,
+    el("p", {class: "kv"}, el("span", {text: "回報者："}), document.createTextNode("@" + it.by + " · " + ago(it.at))));
+  const box = el("div", {class: "kv", text: it.comments ? "載入討論中…" : "還沒有討論。看過類似情況，或知道更好的來源，歡迎到 GitHub 補充。"});
+  b.append(box);
+  if (!it.comments) return;
+  try {
+    const r = await fetch(`${API}/issues/${id}/comments?per_page=100`, {headers: {Accept: "application/vnd.github+json"}});
+    if (!r.ok) throw 0;
+    const cs = await r.json(); if (S.openId !== id) return;
+    box.textContent = `討論 ${cs.length}`;
+    for (const c of cs) b.append(el("div", {class: "cmt"}, el("img", {src: c.user.avatar_url + "&s=56", alt: ""}),
+      el("div", {class: "c"}, el("div", {class: "n"}, el("span", {text: "@" + c.user.login}), el("span", {text: ago(c.created_at)})), el("p", {text: c.body}))));
+  } catch { box.textContent = "討論暫時載入不了，可以直接到 GitHub 看。"; }
+}
+function closeSheet() { S.openId = null; $("#sheet").hidden = true; $("#scrim").hidden = true; }
+$("#sh-close").onclick = closeSheet; $("#scrim").onclick = closeSheet;
+document.addEventListener("keydown", e => { if (e.key === "Escape" && S.openId) closeSheet(); });
+$("#q").oninput = e => { S.q = e.target.value; render(); };
+$("#f-type").onchange = e => { S.type = e.target.value; render(); };
+$("#f-ev").onchange = e => { S.ev = e.target.value; render(); };
+$("#sort").onchange = e => { S.sort = e.target.value; render(); };
+let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => drawRadar(S.items), 150); });
+drawRadar([]);
+load();
+</script>
+</body>
+</html>
