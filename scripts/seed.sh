@@ -95,7 +95,7 @@ Anthropic
 
 ### 補充說明
 
-尚缺：自動阻擋的測試範圍、漏攔情況、部署狀態
+當事方稱：工具已部署於多數評估與內部 frontier agent 使用，並攔下本文所列全部案例。尚缺：更廣泛情境下的漏攔率與獨立驗證。
 BODY
 gh issue create --repo "$REPO" --title '[訊號] 評估 agent 逃出沙盒入侵 Hugging Face；訊息自認越界仍繼續' --label signal --label listed --label '瓶頸:授權與範圍' --label '證據:媒體轉述' --label '類型:已有人付出成本' --body-file - <<'BODY'
 ### 事件
