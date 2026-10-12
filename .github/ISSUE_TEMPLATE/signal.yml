@@ -1,5 +1,5 @@
-name: 回報訊號
-description: 回報一則「AI 讓哪種配套開始塞車」的事件或觀察
+name: 回報訊號 · Report a signal
+description: 回報一則「AI 讓哪種配套開始塞車」的事件或觀察 · Report an event where AI is outpacing a supporting system
 title: "[訊號] "
 labels: ["signal"]
 body:
@@ -8,49 +8,51 @@ body:
       value: |
         感謝回報。整理者會確認來源存在、補上瓶頸分類與證據強度後上架；這則 issue 底下就是這則訊號的討論區。
         請用自己的話描述事件，不要貼上文章原文。
+
+        Thanks. A curator checks that the source exists, then adds the bottleneck and evidence labels before listing it; this issue becomes the signal's discussion thread. Describe the event in your own words, and don't paste the article text. English or Chinese are both fine.
   - type: input
     id: event
     attributes:
-      label: 事件
-      description: 一句話，誰、做了什麼、結果如何
+      label: 事件 Event
+      description: 一句話，誰、做了什麼、結果如何 · One sentence, who did what and what happened
       placeholder: 例如：評估中的 AI agent 向警方表單送出捏造線索
     validations:
       required: true
   - type: input
     id: date
     attributes:
-      label: 日期
-      description: 事件發生或揭露的日期，格式 YYYY-MM-DD 或 YYYY-MM；不確定可留空
+      label: 日期 Date
+      description: 事件發生或揭露的日期，格式 YYYY-MM-DD 或 YYYY-MM；不確定可留空 · When it happened or was disclosed (YYYY-MM-DD or YYYY-MM); leave blank if unsure
       placeholder: 2026-07-18
   - type: input
     id: url
     attributes:
-      label: 來源網址
-      description: 以 https:// 開頭；能找到當事方原文最好
+      label: 來源網址 Source
+      description: 以 https:// 開頭；能找到當事方原文最好 · Starts with https://; the involved party's own statement is best
       placeholder: https://
     validations:
       required: true
   - type: dropdown
     id: bottleneck
     attributes:
-      label: 瓶頸
-      description: 你覺得它屬於哪一種塞車；整理者會再確認
+      label: 瓶頸 Bottleneck
+      description: 你覺得它屬於哪一種塞車；整理者會再確認 · Your best guess; a curator decides
       options:
-        - 審查與查證
-        - 授權與範圍
-        - 協調與容量
-        - 偵測與事故證據
-        - 信任與正當性
-        - 實體與資源
-        - 不確定
+        - 審查與查證 Review & verification
+        - 授權與範圍 Authority & scope
+        - 協調與容量 Coordination & capacity
+        - 偵測與事故證據 Detection & incident evidence
+        - 信任與正當性 Trust & legitimacy
+        - 實體與資源 Physical resources
+        - 不確定 Not sure
       default: 6
   - type: input
     id: cost
     attributes:
-      label: 誰付了代價
-      description: 誰承擔了損失、處理成本或額外工作；不知道可留空
+      label: 誰付了代價 Who paid
+      description: 誰承擔了損失、處理成本或額外工作；不知道可留空 · Who absorbed the loss, cleanup cost or extra work; leave blank if unknown
   - type: textarea
     id: note
     attributes:
-      label: 補充說明
-      description: 為什麼你認為這是塞車的訊號？還缺什麼證據？
+      label: 補充說明 Notes
+      description: 為什麼你認為這是塞車的訊號？還缺什麼證據？ · Why is this a bottleneck signal? What evidence is still missing?

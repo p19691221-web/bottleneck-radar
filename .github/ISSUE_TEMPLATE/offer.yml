@@ -1,53 +1,56 @@
-name: 我能解這個
-description: 針對雷達上某一則訊號，說明你或你的團隊能提供什麼解法
+name: 我能解這個 · I can solve this
+description: 針對雷達上某一則訊號，說明你能提供什麼解法 · Describe how you or your team can address a signal on the radar
 title: "[回應] "
 labels: ["offer"]
 body:
   - type: markdown
     attributes:
       value: |
-        這則 issue 是公開的，任何人都看得到，包含你填的聯絡方式。請留公開的管道（網站、GitHub、公司信箱），不要留私人電話。
-        整理者會先確認能力證據的連結存在，再讓回應出現在網站上。上架只代表連結存在，不代表能力已被驗證。
+        這則 issue 是公開的，任何人都看得到，包含你填的聯絡方式。請留公開的管道（網站、GitHub、公司信箱），不要留私人電話。整理者確認能力證據的連結存在後，回應才會出現在網站上；上架只代表連結存在，不代表能力已被驗證。
+
+        This issue is public, including your contact details. Use a public channel (website, GitHub, work email), not a personal phone number. A curator checks that your evidence link exists before the offer appears on the site. Listing means the link exists, not that the capability has been verified.
+
+        中文或英文都可以填。 Answers in English or Chinese are both fine.
   - type: input
     id: signal
     attributes:
-      label: 對應訊號
-      description: 雷達上那則訊號的 issue 編號；從網站按「我能解這個」進來會自動帶入
+      label: 對應訊號 Signal
+      description: 雷達上那則訊號的 issue 編號；從網站進來會自動帶入 · The signal's issue number; filled in automatically when you come from the site
       placeholder: "#12"
     validations:
       required: true
   - type: input
     id: who
     attributes:
-      label: 名稱
-      description: 個人、團隊或公司名稱
+      label: 名稱 Name
+      description: 個人、團隊或公司名稱 · Person, team or company
     validations:
       required: true
   - type: input
     id: capability
     attributes:
-      label: 能解什麼
-      description: 一句話，你能處理這個瓶頸的哪一段
-      placeholder: 例如：替 agent 的工具呼叫加上可回放的稽核紀錄
+      label: 能解什麼 What you solve
+      description: 一句話，你能處理這個瓶頸的哪一段 · One sentence on which part of this bottleneck you handle
+      placeholder: 例如：替 agent 的工具呼叫加上可回放的稽核紀錄 / e.g. replayable audit logs for agent tool calls
     validations:
       required: true
   - type: input
     id: proof
     attributes:
-      label: 能力證據
-      description: 作品、案例、公開 repo 或客戶說明的網址，以 https:// 開頭
+      label: 能力證據 Evidence
+      description: 作品、案例、公開 repo 或客戶說明的網址 · Link to a product page, case study, public repo or customer write-up (https://)
       placeholder: https://
     validations:
       required: true
   - type: input
     id: contact
     attributes:
-      label: 聯絡方式
-      description: 公開的網站、GitHub 帳號或公司信箱
+      label: 聯絡方式 Contact
+      description: 公開的網站、GitHub 帳號或公司信箱 · Public website, GitHub handle or work email
     validations:
       required: true
   - type: textarea
     id: note
     attributes:
-      label: 補充說明
-      description: 適用範圍、限制、地區或語言；做不到的部分也請寫上
+      label: 補充說明 Notes
+      description: 適用範圍、限制、地區或語言；做不到的部分也請寫上 · Scope, limits, regions or languages, including what you can't do

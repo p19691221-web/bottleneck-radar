@@ -114,6 +114,7 @@ button,input,select{font:inherit;color:inherit}
     <div>
       <h1><small>AI BOTTLENECK RADAR · 哪裡先塞車</small>AI 瓶頸雷達</h1>
       <p class="sub">AI 讓產出、建議和操作變得便宜，跟不上的是審查、授權、協調、事故證據、信任和實體資源。這裡收集有來源、標明證據強度的塞車訊號。</p>
+      <p class="sub" lang="en">AI makes output cheap; review, authority, coordination, incident evidence, trust and physical resources don't keep up. Sourced signals, each tagged with evidence strength. Reports and offers welcome in English.</p>
     </div>
     <div class="stats">
       <div><b id="st-all">–</b>則訊號</div>
@@ -151,7 +152,7 @@ button,input,select{font:inherit;color:inherit}
       <option value="talk">最多討論</option>
       <option value="offer">最多可解回應</option>
     </select>
-    <a class="btn primary" id="submit-link" target="_blank" rel="noopener">＋ 回報訊號</a>
+    <a class="btn primary" id="submit-link" target="_blank" rel="noopener">＋ 回報訊號 Report</a>
   </div>
   <div class="active" id="active" hidden></div>
 
@@ -183,12 +184,14 @@ button,input,select{font:inherit;color:inherit}
       </ul>
     </div>
     <div class="panel">
-      <h3>參與方式</h3>
+      <h3>參與方式 · How to take part</h3>
       <p>回報與討論都在 GitHub 上進行，需要一個免費帳號。請用自己的話描述事件，附上來源連結，不要貼文章原文。卡片上的 👍 代表「我也看到類似情況」。</p>
+      <p lang="en" style="margin-top:6px">Reports and discussion run on GitHub (free account). Use your own words and link the source. 👍 means "I've seen this too."</p>
     </div>
     <div class="panel">
-      <h3>我能解這個</h3>
+      <h3>我能解這個 · I can solve this</h3>
       <p>能處理某個瓶頸的人或團隊，可以在那則訊號下留一份回應：能解哪一段、能力證據、公開聯絡方式。整理者確認證據連結存在後才會顯示。顯示只代表連結存在，不代表能力已被驗證，也不是推薦。</p>
+      <p lang="en" style="margin-top:6px">If you can address a bottleneck, leave an offer on that signal: what you solve, an evidence link, a public contact. It appears once the link is checked. Listing is not verification or endorsement.</p>
     </div>
   </section>
 </div>
@@ -200,7 +203,7 @@ button,input,select{font:inherit;color:inherit}
     <button class="btn" id="sh-close">關閉</button>
   </header>
   <div class="body" id="sh-body"></div>
-  <footer><span>討論與 👍 都在 GitHub 上</span><a class="btn primary" id="sh-gh" target="_blank" rel="noopener">到 GitHub 討論</a></footer>
+  <footer><span>討論與 👍 都在 GitHub 上</span><a class="btn primary" id="sh-gh" target="_blank" rel="noopener">到 GitHub 討論 · Discuss</a></footer>
 </aside>
 
 <script>
@@ -254,7 +257,7 @@ function ago(iso) {
   return new Date(t).toLocaleDateString("zh-TW");
 }
 
-/* GitHub issue form 內文格式：### 標題，空一行，內容 */
+/* GitHub issue form 內文格式：### 標題，空一行，內容。標題取第一個詞，相容中英雙語標籤 */
 function parseForm(body) {
   const out = {};
   const parts = (body || "").split(/^###[ ]+/m).slice(1);
@@ -263,7 +266,7 @@ function parseForm(body) {
     const k = (i < 0 ? p : p.slice(0, i)).trim();
     let v = i < 0 ? "" : p.slice(i + 1).trim();
     if (v === "_No response_") v = "";
-    out[k] = v;
+    out[k.split(/\s+/)[0]] = v;  /* 「事件 Event」與舊的「事件」都對應到「事件」 */
   }
   return out;
 }
@@ -477,18 +480,18 @@ function offerUrl(it) {
 function solveRow(it) {
   const n = offersFor(it.id).length;
   return el("div", {class: "solve"},
-    n ? el("button", {type: "button", onclick: () => openSheet(it.id), text: `🤝 ${n} 組可解`}) : el("span", {text: "還沒有人回應"}),
-    el("a", {href: offerUrl(it), target: "_blank", rel: "noopener", text: "我能解這個 ↗"}));
+    n ? el("button", {type: "button", onclick: () => openSheet(it.id), text: `🤝 ${n} 組可解 · ${n} offer${n > 1 ? "s" : ""}`}) : el("span", {text: "還沒有人回應 · No offers yet"}),
+    el("a", {href: offerUrl(it), target: "_blank", rel: "noopener", text: "我能解這個 · I can solve this ↗"}));
 }
 function offerCard(o) {
   const contactUrl = safeUrl(o.contact);
   return el("div", {class: "offer"},
     el("b", {text: o.who}),
     o.capability ? el("p", {class: "kv", text: o.capability}) : null,
-    o.proof ? el("p", {class: "kv"}, el("span", {text: "能力證據："}), el("a", {href: o.proof, target: "_blank", rel: "noopener noreferrer", text: hostOf(o.proof) + " ↗"})) : null,
-    o.contact ? el("p", {class: "kv"}, el("span", {text: "聯絡："}), contactUrl ? el("a", {href: contactUrl, target: "_blank", rel: "noopener noreferrer", text: hostOf(contactUrl) + " ↗"}) : document.createTextNode(o.contact)) : null,
-    o.note ? el("p", {class: "kv", style: "white-space:pre-wrap"}, el("span", {text: "補充："}), document.createTextNode(o.note)) : null,
-    el("p", {class: "kv"}, el("span", {text: "@" + o.by + " · " + ago(o.at) + " · "}), el("a", {href: o.html, target: "_blank", rel: "noopener", text: "原始回應 ↗"})));
+    o.proof ? el("p", {class: "kv"}, el("span", {text: "能力證據 Evidence："}), el("a", {href: o.proof, target: "_blank", rel: "noopener noreferrer", text: hostOf(o.proof) + " ↗"})) : null,
+    o.contact ? el("p", {class: "kv"}, el("span", {text: "聯絡 Contact："}), contactUrl ? el("a", {href: contactUrl, target: "_blank", rel: "noopener noreferrer", text: hostOf(contactUrl) + " ↗"}) : document.createTextNode(o.contact)) : null,
+    o.note ? el("p", {class: "kv", style: "white-space:pre-wrap"}, el("span", {text: "補充 Notes："}), document.createTextNode(o.note)) : null,
+    el("p", {class: "kv"}, el("span", {text: "@" + o.by + " · " + ago(o.at) + " · "}), el("a", {href: o.html, target: "_blank", rel: "noopener", text: "原始回應 Original ↗"})));
 }
 
 async function openSheet(id) {
@@ -505,10 +508,10 @@ async function openSheet(id) {
     it.url ? el("p", {class: "kv"}, el("a", {href: it.url, target: "_blank", rel: "noopener noreferrer", text: "開啟來源 ↗"})) : null,
     el("p", {class: "kv"}, el("span", {text: "回報者："}), document.createTextNode("@" + it.by + " · " + ago(it.at)))].filter(Boolean));
   const offers = offersFor(id);
-  b.append(el("p", {class: "kv", style: "margin-top:6px"}, el("strong", {text: offers.length ? `可解回應 ${offers.length}` : "還沒有可解回應"})),
+  b.append(el("p", {class: "kv", style: "margin-top:6px"}, el("strong", {text: offers.length ? `可解回應 Offers ${offers.length}` : "還沒有可解回應 · No offers yet"})),
     ...offers.map(offerCard),
-    el("p", {class: "kv"}, el("span", {text: "顯示只代表證據連結存在，不代表能力已驗證。"})),
-    el("a", {class: "btn", href: offerUrl(it), target: "_blank", rel: "noopener", text: "我能解這個 ↗", style: "align-self:flex-start"}));
+    el("p", {class: "kv"}, el("span", {text: "顯示只代表證據連結存在，不代表能力已驗證。 Listed means the evidence link exists, not that the capability is verified."})),
+    el("a", {class: "btn", href: offerUrl(it), target: "_blank", rel: "noopener", text: "我能解這個 · I can solve this ↗", style: "align-self:flex-start"}));
   const box = el("div", {class: "kv", text: it.comments ? "載入討論中…" : "還沒有討論。看過類似情況，或知道更好的來源，歡迎到 GitHub 補充。"});
   b.append(box);
   if (!it.comments) return;
