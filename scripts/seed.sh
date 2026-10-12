@@ -6,6 +6,7 @@ REPO="${REPO:-p19691221-web/bottleneck-radar}"
 echo '建立標籤…'
 gh label create signal --repo "$REPO" --color ededed --description '投稿的訊號' --force
 gh label create listed --repo "$REPO" --color 0f5c5c --description '已核實來源並上架' --force
+gh label create offer --repo "$REPO" --color c27a0e --description '我能解這個：針對訊號的解法回應' --force
 gh label create '瓶頸:審查與查證' --repo "$REPO" --color dcebe8 --description '瓶頸分類' --force
 gh label create '瓶頸:授權與範圍' --repo "$REPO" --color dcebe8 --description '瓶頸分類' --force
 gh label create '瓶頸:協調與容量' --repo "$REPO" --color dcebe8 --description '瓶頸分類' --force

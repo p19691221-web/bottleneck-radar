@@ -1,0 +1,53 @@
+name: 我能解這個
+description: 針對雷達上某一則訊號，說明你或你的團隊能提供什麼解法
+title: "[回應] "
+labels: ["offer"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        這則 issue 是公開的，任何人都看得到，包含你填的聯絡方式。請留公開的管道（網站、GitHub、公司信箱），不要留私人電話。
+        整理者會先確認能力證據的連結存在，再讓回應出現在網站上。上架只代表連結存在，不代表能力已被驗證。
+  - type: input
+    id: signal
+    attributes:
+      label: 對應訊號
+      description: 雷達上那則訊號的 issue 編號；從網站按「我能解這個」進來會自動帶入
+      placeholder: "#12"
+    validations:
+      required: true
+  - type: input
+    id: who
+    attributes:
+      label: 名稱
+      description: 個人、團隊或公司名稱
+    validations:
+      required: true
+  - type: input
+    id: capability
+    attributes:
+      label: 能解什麼
+      description: 一句話，你能處理這個瓶頸的哪一段
+      placeholder: 例如：替 agent 的工具呼叫加上可回放的稽核紀錄
+    validations:
+      required: true
+  - type: input
+    id: proof
+    attributes:
+      label: 能力證據
+      description: 作品、案例、公開 repo 或客戶說明的網址，以 https:// 開頭
+      placeholder: https://
+    validations:
+      required: true
+  - type: input
+    id: contact
+    attributes:
+      label: 聯絡方式
+      description: 公開的網站、GitHub 帳號或公司信箱
+    validations:
+      required: true
+  - type: textarea
+    id: note
+    attributes:
+      label: 補充說明
+      description: 適用範圍、限制、地區或語言；做不到的部分也請寫上
